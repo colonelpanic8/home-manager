@@ -18,6 +18,13 @@ in
       package = lib.mkPackageOption pkgs.haskellPackages "status-notifier-item" {
         pkgsText = "pkgs.haskellPackages";
       };
+
+      flags = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        example = [ "--log-level" "DEBUG" ];
+        description = "Command-line flags to pass to status-notifier-watcher.";
+      };
     };
   };
 
@@ -36,7 +43,9 @@ in
       Service = {
         Type = "dbus";
         BusName = "org.kde.StatusNotifierWatcher";
-        ExecStart = "${cfg.package}/bin/status-notifier-watcher";
+        ExecStart = lib.concatStringsSep " " (
+          [ "${cfg.package}/bin/status-notifier-watcher" ] ++ cfg.flags
+        );
       };
 
       Install = {
